@@ -22,21 +22,23 @@ class ExLlamaV2WebSocketServer:
     port: int
 
     model: ExLlamaV2
+    draft_model: ExLlamaV2
     tokenizer: ExLlamaV2Tokenizer
     cache: ExLlamaV2Cache
+    draft_cache: ExLlamaV2Cache
     generator = ExLlamaV2StreamingGenerator
 
-
-    def __init__(self, ip: str, port: int, model: ExLlamaV2, tokenizer: ExLlamaV2Tokenizer, cache: ExLlamaV2Cache):
+    def __init__(self, ip: str, port: int, model: ExLlamaV2, tokenizer: ExLlamaV2Tokenizer, cache: ExLlamaV2Cache, draft_model: ExLlamaV2 = None, draft_cache: ExLlamaV2Cache = None):
 
         self.ip = ip
         self.port = port
         self.model = model
+        self.draft_model = draft_model
         self.tokenizer = tokenizer
         self.cache = cache
+        self.draft_cache = draft_cache
 
-        self.generator = ExLlamaV2StreamingGenerator(model, cache, tokenizer)
-
+        self.generator = ExLlamaV2StreamingGenerator(model, cache, tokenizer, draft_model, draft_cache)
 
     def serve(self):
 
@@ -45,7 +47,6 @@ class ExLlamaV2WebSocketServer:
         start_server = websockets.serve(self.main, self.ip, self.port)
         asyncio.get_event_loop().run_until_complete(start_server)
         asyncio.get_event_loop().run_forever()
-
 
     async def main(self, websocket, path):
 

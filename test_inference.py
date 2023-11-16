@@ -43,7 +43,7 @@ model_init.add_args(parser)
 args = parser.parse_args()
 model_init.check_args(args)
 model_init.print_options(args)
-model, tokenizer = model_init.init(args, allow_auto_split = True)
+model, draft_model, tokenizer = model_init.init(args, allow_auto_split = True)
 
 # Auto split
 

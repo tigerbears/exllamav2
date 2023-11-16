@@ -25,7 +25,8 @@ model_init.add_args(parser)
 args = parser.parse_args()
 model_init.check_args(args)
 model_init.print_options(args)
-model, tokenizer = model_init.init(args, allow_auto_split = True)
+model, draft_model, tokenizer = model_init.init(args, allow_auto_split = True)
+draft_cache = None
 
 # Load model after cache if --gpu_split auto
 
@@ -38,10 +39,25 @@ if not model.loaded:
 else:
     cache = ExLlamaV2Cache(model)
 
+# Do the same for the draft model, if it exists
+
+if draft_model is not None:
+
+    # Load model after cache if --gpu_split auto
+
+    if not draft_model.loaded:
+        draft_cache = ExLlamaV2Cache(draft_model, lazy = True)
+        draft_model.load_autosplit(cache)
+
+    # Else create cache
+
+    else:
+        draft_cache = ExLlamaV2Cache(draft_model)
+
 # Create server
 
 ip, port = args.host.split(":")
 port = int(port)
 
-server = ExLlamaV2WebSocketServer(ip, port, model, tokenizer, cache)
+server = ExLlamaV2WebSocketServer(ip, port, model, tokenizer, cache, draft_model, draft_cache)
 server.serve()
