@@ -8,6 +8,7 @@
 
 import json
 import asyncio
+import os
 
 from exllamav2.generator import (
     ExLlamaV2StreamingGenerator,
@@ -27,6 +28,7 @@ async def dispatch(request, ws, server):
     elif action_ == "lefttrim_token": lefttrim_token(request, ws, server, response)
     elif action_ == "infer": await infer(request, ws, server, response)
     elif action_ == "stop": stop(request, ws, server, response)
+    elif action_ == "settings": settings(request, ws, server, response)
 
     else:
         print(f" ## Unknown request from client: {request}")
@@ -34,6 +36,27 @@ async def dispatch(request, ws, server):
 
     await ws.send(json.dumps(response))
 
+
+def settings(request, ws, server, response):
+
+    """
+    request:  { action: str = "settings",
+                request_id: str,                    # (optional) request ID to echo in response packet
+                response_id: str }                  # (optional) response ID to echo in response packet
+
+    response: { action: str = "settings",
+                request_id: str,                    # (optional)
+                response_id: str,                   # (optional)
+                settings: dict }                    # Current server settings useful for clients, such as the current model name and max_seq_len
+    """
+
+    model_dir = server.model.config.model_dir
+    model_name = os.path.basename(os.path.normpath(model_dir))
+
+    response["settings"] = {
+        "max_seq_len" : server.model.config.max_seq_len,
+        "model_name" : model_name
+    }
 
 def echo(request, ws, server, response):
 
