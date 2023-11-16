@@ -102,13 +102,22 @@ async def infer(request, ws, server, response):
                 max_new_tokens: int,                # max num new tokens
                 stream: bool,                       # stream response
                 stream_full: bool,                  # return full response-so-far with each streamed chunk
-                top_p: float,                       # (optional) top-P threshold (0 to disable)
-                top_k: int,                         # (optional) top-K count (0 to disable)
-                typical: float,                     # (optional) typical threshold (0 to disable)
-                temperature: float,                 # (optional) sampling temperature (1.0 = no temp adjust)
+
+                min_p: float,                       # (optional) min-P threshold (0 to disable)
+                mirostat: bool,                     # (optional) enable mirostat sampling
+                mirostat_eta: float,                # (optional) mirostat_eta, ranges from 0-1
+                mirostat_tau: float,                # (optional) mirostat_tau, ranges from 0-10
                 rep_pen: float,                     # (optional) repetition penalty (1.0 = no penalty)
+                rep_pen_decay: int,                 # (optional) repetition penalty decay
+                rep_pen_range: int,                 # (optional) repetition penalty range, in tokens
+                temperature: float,                 # (optional) sampling temperature (1.0 = no temp adjust)
+                tfs: float,                         # (optional) tail-free sampling (0 to disable)
+                top_k: int,                         # (optional) top-K count (0 to disable)
+                top_p: float,                       # (optional) top-P threshold (0 to disable)
+                typical: float,                     # (optional) typical threshold (0 to disable)
+
                 stop_conditions: [str|int],         # (optional) list of stop conditions
-                token_healing: bool,                # (optionsl) enable token healing
+                token_healing: bool,                # (optional) enable token healing
                 tag: str }                          # (optional) tag to echo in response packet
 
     streams:  { action: str = "infer",
@@ -161,11 +170,18 @@ async def infer(request, ws, server, response):
     # Sampler
 
     gs = ExLlamaV2Sampler.Settings()
+    gs.min_p = float(request["min_p"]) if "min_p" in request else 0
+    gs.mirostat = bool(request["mirostat"]) if "mirostat" in request else False
+    gs.mirostat_eta = float(request["mirostat_eta"]) if "mirostat_eta" in request else 0.1
+    gs.mirostat_tau = float(request["mirostat_tau"]) if "mirostat_tau" in request else 5
+    gs.token_repetition_penalty = float(request["rep_pen"]) if "rep_pen" in request else 1.15
+    gs.token_repetition_decay = int(request["rep_pen_decay"]) if "rep_pen_decay" in request else 0
+    gs.token_repetition_range = int(request["rep_pen_range"]) if "rep_pen_range" in request else -1
+    gs.temperature = float(request["temperature"]) if "temperature" in request else 0.95
+    gs.tfs = float(request["tfs"]) if "tfs" in request else 0
     gs.top_k = int(request["top_k"]) if "top_k" in request else 100
     gs.top_p = float(request["top_p"]) if "top_p" in request else 0.8
     gs.typical = float(request["typical"]) if "typical" in request else 0
-    gs.temperature = float(request["temperature"]) if "temperature" in request else 0.95
-    gs.token_repetition_penalty = float(request["rep_pen"]) if "rep_pen" in request else 1.15
 
     # Generate
 
