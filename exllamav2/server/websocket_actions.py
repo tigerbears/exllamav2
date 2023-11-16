@@ -48,7 +48,7 @@ def echo(request, ws, server, response):
     pass
 
 
-def estimate_token(request, we, server, response):
+def estimate_token(request, ws, server, response):
 
     """
     request:  { action: str = "estimate_token",
@@ -188,7 +188,7 @@ async def infer(request, ws, server, response):
 
         if eos or gen_tokens >= num_tokens: break
 
-    if stream: del response["chunk"]
+    if stream and "chunk" in response: del response["chunk"]
     response["response_type"] = "full"
     response["util_text"] = util_ctx
     response["response"] = completion
