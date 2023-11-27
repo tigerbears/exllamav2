@@ -161,7 +161,7 @@ async def infer(request, ws, server, response):
 
     # Mode
 
-    stream = request["stream"]
+    stream = request.get("stream", True)
     if "tag" in request:
         response["tag"] = request["tag"]
 
@@ -216,14 +216,17 @@ async def infer(request, ws, server, response):
 
     while True:
         chunk, eos, _ = server.generator.stream()
-        completion += chunk
-        gen_tokens += 1
 
-        if stream and chunk != "":
-            response["response_type"] = "chunk"
-            response["chunk"] = chunk
-            if full_response: response["response"] = completion
-            await ws.send(json.dumps(response))
+        if chunk is not None:
+            completion += chunk
+            gen_tokens += 1
+
+            if stream and chunk != "":
+                response["response_type"] = "chunk"
+                response["chunk"] = chunk
+
+                if full_response: response["response"] = completion
+                await ws.send(json.dumps(response))
 
         if eos or gen_tokens >= num_tokens: break
 
