@@ -114,6 +114,18 @@ async def infer(request, ws, server, response):
                 freq_pen: float,                    # (optional) frequency penalty (0.0 = no penalty)
                 pres_pen: float,                    # (optional) presence penalty (0.0 = no penalty)
                 skew: float,                        # (optional) skew factor (0.0 = disabled)
+
+                rep_pen_decay: int,                 # (optional) repetition penalty decay
+                rep_pen_range: int,                 # (optional) repetition penalty range, in tokens
+                tfs: float,                         # (optional) tail-free sampling (0 to disable)
+                max_temp: float,                    # (optional) max_temp
+                min_temp: float,                    # (optional) min_temp
+                mirostat: bool,                     # (optional) enable mirostat sampling
+                mirostat_eta: float,                # (optional) mirostat_eta, ranges from 0-1
+                mirostat_tau: float,                # (optional) mirostat_tau, ranges from 0-10
+                smoothing_factor: float,            # (optional) smoothing_factor, defaults to 0.0
+                temp_exponent: float,               # (optional) temp_exponent, defaults to 1.0
+
                 customBos: str,                     # (optional) custom BOS token
                 stop_conditions: [str|int],         # (optional) list of stop conditions
                 token_healing: bool,                # (optionsl) enable token healing
@@ -201,6 +213,18 @@ async def infer(request, ws, server, response):
         gs.token_repetition_penalty = float(request["rep_pen"]) if "rep_pen" in request else 1.05
         gs.token_frequency_penalty = float(request["freq_pen"]) if "freq_pen" in request else 0.0
         gs.token_presence_penalty = float(request["pres_pen"]) if "pres_pen" in request else 0.0
+
+        gs.token_repetition_decay = int(request["rep_pen_decay"]) if "rep_pen_decay" in request else 0
+        gs.token_repetition_range = int(request["rep_pen_range"]) if "rep_pen_range" in request else -1
+        gs.tfs = float(request["tfs"]) if "tfs" in request else 0
+        gs.mirostat = bool(request["mirostat"]) if "mirostat" in request else False
+        gs.mirostat_eta = float(request["mirostat_eta"]) if "mirostat_eta" in request else 0.1
+        gs.mirostat_tau = float(request["mirostat_tau"]) if "mirostat_tau" in request else 5
+        gs.max_temp = float(request["max_temp"]) if "max_temp" in request else 0.0
+        gs.min_temp = float(request["min_temp"]) if "min_temp" in request else 0.0
+        gs.smoothing_factor = float(request["smoothing_factor"]) if "smoothing_factor" in request else 0.0
+        gs.temp_exponent = float(request["temp_exponent"]) if "temp_exponent" in request else 1.0
+
         if bb is not None:
             gs.disallow_tokens(server.tokenizer, bb)
 
