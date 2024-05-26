@@ -185,7 +185,8 @@ async def infer(request, ws, server, response):
         else:
             ids = ids[:, overflow:]
             util_ctx = server.tokenizer.decode(ids)
-            
+
+        print(f"Processing {ids.shape[-1]} tokens of context.")
 
         # Sampler
 
