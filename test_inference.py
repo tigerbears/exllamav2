@@ -88,7 +88,7 @@ if args.stream_layers:
 
 model_init.check_args(args)
 model_init.print_options(args)
-model, tokenizer = model_init.init(args,
+model, draft_model, tokenizer = model_init.init(args,
                                    allow_auto_split = True,
                                    skip_load = args.stream_layers,
                                    benchmark = True,
